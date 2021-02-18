@@ -1,0 +1,216 @@
+// Main
+package com.pragya.javafxapp;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import java.util.Optional;
+
+public class Main extends Application {
+	public static void main(String [] args){
+    launch(args);
+	}
+
+	@Override
+	public void init() throws Exception {
+		System.out.println("init");
+		super.init();
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception{
+		System.out.println("start");
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("app_layout.fxml"));
+		VBox rootNode = loader.load();
+		MenuBar menuBar=createMenu();
+		rootNode.getChildren().add(0,menuBar);// add menubar as a first child within VBox
+
+
+		Scene scene = new Scene(rootNode);
+
+		primaryStage.setScene(scene);
+		primaryStage.setTitle("Temperature Converter Tool");
+		//primaryStage.setResizable(false); make your application non-resizable but this is not good practice..
+		primaryStage.show();
+	}
+	private MenuBar createMenu(){
+		// creating file menu
+		Menu fileMenu=new Menu("File");
+		MenuItem newMenuItem= new MenuItem("New");
+
+		newMenuItem.setOnAction(event -> { System.out.println("New menu item clicked");//LAMBDA EXPRESSION event is a parameter.			//newGame(); or newProject(); if u r making a game or so.
+		});
+
+		SeparatorMenuItem separatorMenuItem=new SeparatorMenuItem();
+		MenuItem quitMenuItem= new MenuItem("Quit");
+		// onclick event handler
+		quitMenuItem.setOnAction(event -> {
+			Platform.exit();//simply exit the current application.
+			System.exit(0);// shutdown current virtual machine.
+			//QuitApp(); or u can write a function here only to shut down a game or off the game
+		});
+		fileMenu.getItems().addAll(newMenuItem,separatorMenuItem,quitMenuItem);
+
+		//help menu
+		Menu helpMenu=new Menu("Help");
+        MenuItem aboutApp= new MenuItem("About");
+        aboutApp.setOnAction(event -> aboutApp());
+
+        helpMenu.getItems().addAll(aboutApp);
+		// menu bar
+		MenuBar menuBar=new MenuBar();
+        menuBar.getMenus().addAll(fileMenu,helpMenu);
+        return menuBar;
+	}
+
+	private void aboutApp() {
+		Alert alertDialog=new Alert(Alert.AlertType.INFORMATION);
+        alertDialog.setTitle("My First Desktop application");// title
+        alertDialog.setHeaderText("Learning JavaFx");//subtitle
+		alertDialog.setContentText("I am just a beginner and soon be pro and start developing awesome java games.");//description
+
+	    ButtonType yesBtn= new ButtonType("Yes"); //our own custom buttons as we wanted yes or no in place of ok
+	    ButtonType noBtn= new ButtonType("No");
+
+	    alertDialog.getButtonTypes().setAll(yesBtn,noBtn);// adding buttons in alert box.
+
+		Optional<ButtonType> clickedBtn=alertDialog.showAndWait();// Optional class is just a container i.e. contains object of button type.
+
+		if(clickedBtn.isPresent()&& clickedBtn.get()==yesBtn){
+         System.out.println("Yes button clicked !!");
+        }
+		else{
+			System.out.println("No button clicked !!");
+		}
+	}
+
+	@Override
+	public void stop() throws Exception {
+		System.out.println("stop");
+		super.stop();
+	}
+}
+
+// app_layout
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="381.0" prefWidth="436.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pragya.javafxapp.Controller"> 
+    <children>
+        <Pane prefHeight="200.0" prefWidth="200.0">
+            <children>
+                <Label fx:id="welcomeLabel" alignment="CENTER" layoutX="4.0" layoutY="47.0" prefHeight="27.0" prefWidth="439.0" text="Welcome">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                </Label>
+                <ChoiceBox fx:id="choiceBox" layoutX="101.0" layoutY="88.0" prefHeight="25.0" prefWidth="219.0" />
+                <TextField fx:id="userInputField" layoutX="104.0" layoutY="124.0" prefHeight="25.0" prefWidth="212.0" promptText="Enter Temperature" />
+                <Button fx:id="convertButton" layoutX="171.0" layoutY="161.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="105.0" text="Convert" />
+            </children>
+        </Pane>
+    </children>
+</VBox>
+
+// controller
+package com.pragya.javafxapp;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+
+
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class Controller implements Initializable {
+	@FXML
+	public Label welcomeLabel;
+	@FXML
+    public ChoiceBox<String> choiceBox;
+    @FXML
+    public TextField userInputField;
+    @FXML
+    public Button convertButton;
+    private static final String C_To_F_TEXT="Celcius to Farenheit";//both has same value below so we use this.
+	private static final String F_To_C_TEXT="Farenheit to celcius";
+
+	private boolean isC_To_F=true;
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) // act as entry point for this controller
+	 {
+	 	choiceBox.getItems().add(C_To_F_TEXT);// all element should belong to same class like string then both should be string nd so on.
+	 	choiceBox.getItems().add(F_To_C_TEXT);
+
+	 	choiceBox.setValue(C_To_F_TEXT);// to put it as default value.
+		 choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+
+		 	if(newValue.equals(C_To_F_TEXT)){//if user has selected "celcius to farenheit"
+		 		isC_To_F=true;
+		    }else{
+		 		isC_To_F=false;//else user has selected "farenheit to celcius"
+		    }
+		 });
+	 	
+        convertButton.setOnAction(event -> {
+        	convert();
+        });
+	}
+
+	private void convert() {
+		String input =userInputField.getText();//getText gives the value in string like 23.4==>"23.4"
+		float entertemperature=0.0f;
+		try{
+			 entertemperature=Float.parseFloat(input);// if we pass "23.4" this will be converted into 23.4f
+		}catch (Exception e){
+			warnuser();
+			return;
+			//no code executed but if there is no exception then after try block it will not enter catch and execute further
+		}
+
+
+		float newTemperature=0.0f;
+		if(isC_To_F){
+			newTemperature = (entertemperature*9/5)+32;// formula to convert into farenheit.  if user has selected "celcius to farenheit"
+		}
+		else{
+			newTemperature=(entertemperature-32)*5/9;//else user has selected "farenheit to celcius"
+		}
+		display(newTemperature);
+	}
+
+	private void warnuser() {
+		Alert alert=new Alert(Alert.AlertType.ERROR);
+		alert.setTitle("Error Occurred");
+		alert.setHeaderText("Invalid Temperature Entered");
+		alert.setContentText("Please enter a valid temperature.");
+		alert.show();
+	}
+
+	private void display(float newTemperature) {
+		String unit=isC_To_F?"C":"F";
+		System.out.println("New Temperature is:"+newTemperature+unit);
+		Alert alert=new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Result");
+		alert.setContentText("New Temperature is:  "+newTemperature+" "+unit);
+		alert.show();
+	}
+}
+
+
